@@ -291,6 +291,13 @@ def _convert_message_to_dict(
                 _lc_invalid_tool_call_to_openai_tool_call(tc)
                 for tc in message.invalid_tool_calls
             ]
+
+            #supplementing request content integrity compatibility for vLLM implementation of the OpenAI Responses API
+            message_dict["content"] = [
+                {**tc, "status": tc.get("status", None)} if tc.get("type") == "function_call" else tc
+                for tc in message.content
+            ]
+
         elif "tool_calls" in message.additional_kwargs:
             message_dict["tool_calls"] = message.additional_kwargs["tool_calls"]
             tool_call_supported_props = {"id", "type", "function"}
